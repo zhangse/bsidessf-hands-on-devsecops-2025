@@ -253,12 +253,9 @@ Give you secret a name e.g. `demo_secret`.
 
 Add a `Secret` - let's use something simple like `password` for this example. Of course, this is not a good option for a real life password!
 
-This secret should now be visibile:
-
-
 ![Secret in GitHub](./img/reposecret.png "Secret in GitHub")
 
-This secret can be used now in Actions pipelines, to avoid having to hard code it into a file.
+The secret should now be visibile. This secret can be used now in Actions pipelines, to avoid having to hard code it into a file.
 
 Let's try this out.
 
@@ -353,17 +350,13 @@ Later in this workshop we will be looking at how you can extract the list of dep
 
 What if you want to scan your code in PRs for vulnerabilities? That's where CodeQL integrated into GitHub comes in handy. With this feature we can run CodeQL as a GitHub Action and scan any code that is a supported language pushed into the repository for vulnerabilities. 
 
-In this example we have enabled CodeQL by default in this repository. Let's take a look at the configuration.
+In this example we will enable CodeQL in this repository using the Advanced feature. Let's take a look at the configuration.
 
-Go to the `Actions` tab in GitHub and you will see there are two CodeQL workflows.
+![Actions Workflows](./img/codeqlexample.png "CodeQL Config")
 
-![Actions Workflows](./img/codeqlexample.png "Workflows")
+Go to the `Actions` tab in GitHub and you will see the workflow, or you can view it via the `.github/worksflows` directory under the Code tab. 
 
-When setting up CodeQL you can manually add a file or configure it with default values directly in GitHub.
-
-From the workflows list, the top item is an example of one that was created directly in GitHub wthout adding a `codeql.yml` file.
-
-The next one down, uses the `codeql.yml` file.
+From the workflows list under `Actions`, the Actions is an example of a CodeQL one that was created directly in GitHub via adding a `codeql.yml` file.
 
 Let's see if CodeQL has detected any vulnerabilities. Navigate to:
 
@@ -404,7 +397,7 @@ You may also want to check the Action you created earlier that included Horusec.
 We've now seen how we can use SAST in GitHub, let's take a look at how we can prevent code being merged into branches unless a user has permission, or our SAST scans are successful.
 
 
-## Module 6:Branch protection rules
+## Module 6:Rulesets
 
 The `main` branch represents our mainline of development, and would likely be deployed to a production envrionment. It is therefore important that only certain users have permission to add code to it, and also that the code that is merged in is clean and free of security vulnerabilities. 
 
@@ -418,21 +411,21 @@ Protect this branch from force pushing or deletion, or require status checks bef
 
 The first option is to select the `Protect this branch` button from the repository next to the above message.
 
-The second option is to configure the branch protection rule through the settings. To do this, follow these steps:
+The second option is to configure the `Rulesets` through the settings. To do this, follow these steps:
 
 1. Select `Settings` from the top menu
 
 2. On the left select `Branches`
 
-3. You should see a button called `Add banch protection rule`
+3. You should see a button called `Add banch ruleset`. For those of you familiar with GitHub, you will also see the old `branch protection rule` option.
 
 4. When you select this, a menu will load. 
 
-5. You can set the `Branch name pattern` to `main`
+5. You can select the `Target branches` as `Include by pattern` and set this to `main`
 
-6. Select `Require a pull request before merging`
+6. Select `Require a pull request before merging` from the Branch rules check boxes.
 
-7. Next select `Require status checks to pass before merging`
+7. Next select `Require code scanning results`
 
 8. Select `Create`
 
@@ -529,7 +522,7 @@ Now you know how to generate an SBOM, you've reached the end of this module!
 
 ## Wrap-up 
 
-Congratulations you have completed this workshop.
+Congratulations you have completed this BSides SF workshop.
 
 During this 2 hour session we have walked through many techniques, but we could only scratch the surface.
 
