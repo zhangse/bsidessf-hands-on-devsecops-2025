@@ -28,11 +28,18 @@ We can use both GitHub native and CI/CD orientated tools to scan for secrets in 
 
 GitHub provides us with an built-in mechanism to scan for secrets. This includes the ability to scan for custom patterns as well as common key formats, such as AWS API keys.
 
-Configuration of Secrets scanning in GitHub, including the configuration of custom patterns is found under `Settings > Code security and analysis`. Depending on the type of license you have some featurs may not be available. In the lvie version of this workshop at BSides SF we will demo these features. 
+Configuration of Secrets scanning in GitHub, including the configuration of custom patterns is found under `Settings > Code security and analysis`. Depending on the type of license you have some features may not be available. In the live version of this workshop at BSides SF we will demo these features. 
 
-![Part 2 - Secrets scanning](./img/secretsconfig.png "Secrets configuration")
+![Part 2 - Secrets scanning](./img/secretsconfignolicense.png "Secrets configuration for public repo no license")
 
-We're going to add a regex for detecting the private key in PEM format. So, let's see how this works. 
+As seen in the above screenshot, for a forked public repository we only have the ability automatically scan for partner detected secrets, and to enable push protection rules.
+
+What if we have a liense however for the paid version of GHAS? Well there is a lot more we can do. If you have a paid version then feel free to follow along. 
+
+![Part 2 - Secrets scanning](./img/secretsconfiglicense.png "Secrets configuration for public repo with license")
+
+
+In this example qe're going to add a regex for detecting the private key in PEM format. So, let's see how this works. 
 
 We will create a new rule, the `PEM` detection rule and open it up. 
 
