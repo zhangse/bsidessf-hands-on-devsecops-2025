@@ -28,11 +28,11 @@ We can use both GitHub native and CI/CD orientated tools to scan for secrets in 
 
 GitHub provides us with an built-in mechanism to scan for secrets. This includes the ability to scan for custom patterns as well as common key formats, such as AWS API keys.
 
-Configuration of Secrets scanning in GitHub, including the configuration of custom patterns is found under `Settings > Code security and analysis`.
+Configuration of Secrets scanning in GitHub, including the configuration of custom patterns is found under `Settings > Code security and analysis`. Depending on the type of license you have some featurs may not be available. In the lvie version of this workshop at BSides SF we will demo these features. 
 
 ![Part 2 - Secrets scanning](./img/secretsconfig.png "Secrets configuration")
 
-We're going to add the regex for detecting the private key. So, let's see how this works. 
+We're going to add a regex for detecting the private key in PEM format. So, let's see how this works. 
 
 We will create a new rule, the `PEM` detection rule and open it up. 
 
