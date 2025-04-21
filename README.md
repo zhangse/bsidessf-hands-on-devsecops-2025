@@ -44,7 +44,7 @@ Here we cover some repository scanning methodologies, including scanning for sec
 
 5. Static analysis in more detail. GitHub's GHAS (GitHub Advanced Security) contains a native SAST tool built on CodeQL and some newer AI features that allow you to Autofix issues. This section of the class walks through how it works and how it can be integrated into GitHub actions. This section of the talk will also cover the Open Source Horusec tool and how it can be used in the same capacity.[Module 5:Static Analysis](https://github.com/tweag/bsidessf-hands-on-devsecops-2025/tree/main/src#module-5static-analysis)
 
-6. Rule sets and pull request gating mechanisms. The penultimate topic covered is how rule sets and PR gating mechanisms can leverage SAST tools to block pull requests that fail security checks.[Module 6:Branch protection rules](https://github.com/tweag/bsidessf-hands-on-devsecops-2025/tree/main/src#module-6branch-protection-rules)
+6. Rule sets and pull request gating mechanisms. The penultimate topic covered is how rule sets and PR gating mechanisms can leverage SAST tools to block pull requests that fail security checks.[Module 6:Branch protection rules](https://github.com/tweag/bsidessf-hands-on-devsecops-2025/tree/main/src#module-6rulesets)
 
 7. SBOMs - Software Bill of Material. GitHub dependency featurescan be used to extract a Software Bill of Materials from your application repositories. [Module 7:SBOMs Software Bill of Materials](https://github.com/tweag/bsidessf-hands-on-devsecops-2025/tree/main/src#module-7sboms-software-bill-of-materials)
 
