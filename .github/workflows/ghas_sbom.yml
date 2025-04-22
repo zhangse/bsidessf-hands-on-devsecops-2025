@@ -7,6 +7,7 @@ on:
 jobs:
   sbom-and-vex:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,17 +29,9 @@ jobs:
           syft . -o cyclonedx-json --file sbom.cdx.json
         shell: bash
 
-      - name: Patch SBOM for CycloneDX 1.6 compliance
+      - name: Patch SBOM specVersion to 1.6
         run: |
-          jq '
-            .specVersion = "1.6" |
-            .metadata.component.supplier.name as $vendor |
-            .metadata.tools = (
-              .metadata.tools.components
-              | map({ vendor: $vendor, name: .name, version: .version })
-            ) |
-            del(.metadata.tools.components)
-          ' sbom.cdx.json > sbom.cdx.patched.json
+          jq '.specVersion = "1.6"' sbom.cdx.json > sbom.cdx.patched.json
         shell: bash
 
       - name: Generate VEX document
