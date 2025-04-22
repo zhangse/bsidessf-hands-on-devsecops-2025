@@ -34,9 +34,6 @@
   "horusecCliReturnErrorIfFoundVulnerability": false,
   "horusecCliRiskAcceptHashes": [
   ],
-  "horusecCliSeveritiesToIgnore": [
-    ""
-  ],
   "horusecCliTimeoutInSecondsAnalysis": 600,
   "horusecCliTimeoutInSecondsRequest": 300,
   "horusecCliToolsConfig": {
