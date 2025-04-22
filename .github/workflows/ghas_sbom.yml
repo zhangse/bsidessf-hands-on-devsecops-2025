@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  sbom-vex:
+  sbom-and-vex:
     runs-on: ubuntu-latest
     steps:
 
@@ -28,17 +28,13 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
             | sh -s -- -b /usr/local/bin
 
-      - name: Install Vexy and bleeding‑edge OSV client
-        run: |
-          pip install --upgrade pip
-          pip install vexy
-          pip uninstall -y osv
-          pip install git+https://github.com/google/osv-python.git@main
+      - name: Install cve‑bin‑tool
+        run: pip install cve‑bin‑tool
 
       - name: Generate CycloneDX SBOM
         run: syft . -o cyclonedx-json --file sbom.cdx.json
 
-      - name: Patch metadata.tools for Vexy
+      - name: Patch metadata.tools for CycloneDX compliance
         run: |
           jq '
             .metadata.tools = (
@@ -51,20 +47,16 @@ jobs:
             )
           ' sbom.cdx.json > sbom.cdx.patched.json
 
-      - name: Create Vexy config
+      - name: Generate VEX with cve‑bin‑tool
         run: |
-          cat <<EOF > vexy.yml
-          sources:
-            osv:
-          EOF
-
-      - name: Generate VEX document
-        run: |
-          vexy \
-            --config vexy.yml \
-            --in-file sbom.cdx.patched.json \
-            --format json \
-            --output sbom.vex.json
+          cve-bin-tool \
+            --sbom cyclonedx \
+            --sbom-file sbom.cdx.patched.json \
+            --vex-type cyclonedx \
+            --vex-output sbom.vex.json \
+            --vendor "${{ github.repository_owner }}" \
+            --product "${{ github.event.repository.name }}" \
+            --release "${{ github.sha }}"  
 
       - name: Upload SBOM & VEX artifacts
         uses: actions/upload-artifact@v4
