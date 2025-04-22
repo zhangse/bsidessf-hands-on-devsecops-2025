@@ -28,8 +28,8 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
             | sh -s -- -b /usr/local/bin
 
-      - name: Install cve‑bin‑tool
-        run: pip install cve‑bin‑tool
+      - name: Install cve-bin-tool
+        run: pip install cve-bin-tool
 
       - name: Generate CycloneDX SBOM
         run: syft . -o cyclonedx-json --file sbom.cdx.json
@@ -47,7 +47,7 @@ jobs:
             )
           ' sbom.cdx.json > sbom.cdx.patched.json
 
-      - name: Generate VEX with cve‑bin‑tool
+      - name: Generate VEX with cve-bin-tool
         run: |
           cve-bin-tool \
             --sbom cyclonedx \
@@ -56,7 +56,7 @@ jobs:
             --vex-output sbom.vex.json \
             --vendor "${{ github.repository_owner }}" \
             --product "${{ github.event.repository.name }}" \
-            --release "${{ github.sha }}"  
+            --release "${{ github.sha }}"
 
       - name: Upload SBOM & VEX artifacts
         uses: actions/upload-artifact@v4
