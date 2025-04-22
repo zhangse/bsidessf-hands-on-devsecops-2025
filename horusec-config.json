@@ -6,7 +6,7 @@
   "horusecCliDisableDocker": false,
   "horusecCliEnableCommitAuthor": false,
   "horusecCliEnableGitHistoryAnalysis": false,
-  "horusecCliEnableInformationSeverity": false,
+  "horusecCliEnableInformationSeverity": true,
   "horusecCliFalsePositiveHashes": [],
   "horusecCliFilesOrPathsToIgnore": [
     "*tmp*",
@@ -35,7 +35,7 @@
   "horusecCliRiskAcceptHashes": [
   ],
   "horusecCliSeveritiesToIgnore": [
-    "INFO"
+    ""
   ],
   "horusecCliTimeoutInSecondsAnalysis": 600,
   "horusecCliTimeoutInSecondsRequest": 300,
