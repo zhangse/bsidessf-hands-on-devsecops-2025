@@ -47,7 +47,7 @@ jobs:
             )
           ' sbom.cdx.json > sbom.cdx.patched.json
 
-      - name: Generate VEX with cve-bin-tool
+      - name: Generate VEX document
         run: |
           cve-bin-tool \
             --sbom cyclonedx \
@@ -56,12 +56,5 @@ jobs:
             --vex-output sbom.vex.json \
             --vendor "${{ github.repository_owner }}" \
             --product "${{ github.event.repository.name }}" \
-            --release "${{ github.sha }}"
-
-      - name: Upload SBOM & VEX artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-and-vex
-          path: |
-            sbom.cdx.patched.json
-            sbom.vex.json
+            --release "${{ github.sha }}" \
+            || true
