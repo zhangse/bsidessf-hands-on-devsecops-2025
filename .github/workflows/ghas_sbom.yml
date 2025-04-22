@@ -1,4 +1,4 @@
-name: Generate SBOM & VEX
+name: Generate SBOM & VEX
 
 on:
   push:
@@ -9,6 +9,7 @@ jobs:
   sbom-vex:
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -27,8 +28,11 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
             | sh -s -- -b /usr/local/bin
 
-      - name: Install Vexy
-        run: pip install vexy
+      - name: Install Vexy and upgrade OSV client
+        run: |
+          pip install --upgrade pip
+          pip install vexy
+          pip install --upgrade osv
 
       - name: Generate CycloneDX SBOM
         run: syft . -o cyclonedx-json --file sbom.cdx.json
@@ -61,7 +65,7 @@ jobs:
             --format json \
             --output sbom.vex.json
 
-      - name: Upload SBOM & VEX artifacts
+      - name: Upload SBOM & VEX artifacts
         uses: actions/upload-artifact@v4
         with:
           name: sbom-and-vex
