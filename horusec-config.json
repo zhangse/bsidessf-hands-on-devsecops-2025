@@ -1,4 +1,5 @@
 {
+  "horusecCliSeveritiesToIgnore": [],
   "horusecCliCertInsecureSkipVerify": false,
   "horusecCliCertPath": "",
   "horusecCliContainerBindProjectPath": "",
