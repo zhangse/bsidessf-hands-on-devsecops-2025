@@ -2,52 +2,34 @@ name: Generate SBOM & VEX
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   sbom-and-vex:
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Install system tools
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq curl
+          pip install cve-bin-tool jq
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh |
+            sh -s -- -b /usr/local/bin
 
-      - name: Install Syft
+      - name: Create CycloneDX SBOM (1.6)
         run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
-            | sh -s -- -b /usr/local/bin
+          syft . \
+            -o cyclonedx-json \
+            --file sbom.cdx.json \
+            --cyclone-dx-schema-version 1.6
 
-      - name: Install cve-bin-tool
-        run: pip install cve-bin-tool
-
-      - name: Generate CycloneDX SBOM
-        run: syft . -o cyclonedx-json --file sbom.cdx.json
-
-      - name: Patch metadata.tools for CycloneDX compliance
+      - name: Normalize metadata.tools
         run: |
-          jq '
-            .metadata.tools = (
-              .metadata.tools.components
-              | map({
-                  vendor: .author,
-                  name:   .name,
-                  version:.version
-                })
-            )
-          ' sbom.cdx.json > sbom.cdx.patched.json
+          jq '.metadata.tools = (.metadata.tools.components | map({ name: .name, version: .version }))' \
+            sbom.cdx.json > sbom.cdx.patched.json
 
-      - name: Generate VEX document
+      - name: Generate VEX
         run: |
           cve-bin-tool \
             --sbom cyclonedx \
@@ -58,10 +40,11 @@ jobs:
             --product "${{ github.event.repository.name }}" \
             --release "${{ github.sha }}" \
             || true
-      - name: Upload SBOM & VEX artifacts
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: sbom-and-vex
           path: |
             sbom.cdx.patched.json
-            sbom.vex.json  
+            sbom.vex.json
