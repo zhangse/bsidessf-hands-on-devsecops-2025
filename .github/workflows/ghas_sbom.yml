@@ -15,7 +15,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-      - run: |
+
+      - name: Install dependencies
+        run: |
           sudo apt-get update && sudo apt-get install -y jq curl
           pip install cve-bin-tool
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
@@ -24,13 +26,13 @@ jobs:
       - name: Generate CycloneDX SBOM
         run: |
           syft . -o cyclonedx-json --file sbom.cdx.json
+        shell: bash
 
-      - name: Patch SBOM for compliance
+      - name: Patch SBOM for CycloneDX 1.6 compliance
         run: |
           jq '
             .specVersion = "1.6" |
-            .metadata.tools = (.metadata.tools.components | map({ name: .name, version: .version })) |
-            del(.metadata.tools.components)
+            .metadata.tools = (.metadata.tools | map({ name: .name, version: .version }))
           ' sbom.cdx.json > sbom.cdx.patched.json
         shell: bash
 
@@ -46,7 +48,7 @@ jobs:
             --release "${{ github.sha }}" || true
         shell: bash
 
-      - name: Upload artifacts
+      - name: Upload SBOM & VEX artifacts
         uses: actions/upload-artifact@v4
         with:
           name: sbom-and-vex
