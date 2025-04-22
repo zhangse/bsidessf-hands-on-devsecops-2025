@@ -12,23 +12,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate SBOM with Trivy
-        uses: aquasecurity/trivy-action@0.13.0
+      - name: Generate SBOM in CycloneDX format
+        uses: aquasecurity/trivy-action@v0.13.0
         with:
           scan-type: fs
           scan-ref: .
           format: cyclonedx
           output: sbom.cdx.json
 
-      - name: Install Trivy CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget -qO trivy.tar.gz https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz
-          sudo tar -zxvf trivy.tar.gz -C /usr/local/bin trivy
-
       - name: Generate VEX from SBOM
-        run: trivy sbom sbom.cdx.json --vex sbom.vex.cdx.json
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            aquasec/trivy:latest sbom sbom.cdx.json --vex sbom.vex.cdx.json
 
       - name: Upload SBOM and VEX artifacts
         uses: actions/upload-artifact@v4
