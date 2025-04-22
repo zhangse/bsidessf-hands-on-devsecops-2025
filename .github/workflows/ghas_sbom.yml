@@ -1,46 +1,30 @@
-name: SBOM + VEX Pipeline
+name: SBOM + VEX Generation
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  supply-chain:
+  sbom-vex:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4                                       
 
-      - name: Install Trivy
-        uses: aquasecurity/setup-trivy@v0.2.3
-        with:
-          version: v0.61.0
-
+      - name: Install Trivy CLI
+        uses: aquasecurity/setup-trivy@v0.2.3                            
       - name: Generate CycloneDX SBOM
-        run: trivy fs \
-               --format cyclonedx \
-               --output sbom.cdx.json \
-               .
+        run: trivy sbom --format cyclonedx --output sbom.cdx.json       
 
-      # Option A: embed vulnerability data directly
       - name: Generate SBOM + VEX embedded
-        run: trivy fs \
-               --format cyclonedx \
-               --scanners vuln \
-               --output sbom-vex.cdx.json \
-               .
+        run: trivy sbom --format cyclonedx --scanners vuln \
+               --output sbom-vex.cdx.json                              
 
-      # Option B: consume a separate VEX file (if you have one)
-      #- name: Scan SBOM with external VEX
-      #  run: trivy sbom sbom.cdx.json \
-      #         --vex sbom.vex.cdx.json \
-      #         --format cyclonedx \
-      #         --output sbom-with-vex.cdx.json
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4                                
         with:
-          name: sbom-files
+          name: sbom-vex
           path: |
             sbom.cdx.json
             sbom-vex.cdx.json
-            # sbom-with-vex.cdx.json
