@@ -32,12 +32,12 @@ jobs:
         run: |
           jq '
             .specVersion = "1.6" |
-            if (.metadata.tools | type == "object" and has("components")) then
-              .metadata.tools = .metadata.tools.components
-            else
-              .
-            end |
-            .metadata.tools |= map({ name: .name, version: .version })
+            .metadata.component.supplier.name as $vendor |
+            .metadata.tools = (
+              .metadata.tools.components
+              | map({ vendor: $vendor, name: .name, version: .version })
+            ) |
+            del(.metadata.tools.components)
           ' sbom.cdx.json > sbom.cdx.patched.json
         shell: bash
 
