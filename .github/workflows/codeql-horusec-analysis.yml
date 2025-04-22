@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      
+
 permissions:
   actions: write
   contents: read
@@ -175,55 +175,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Horusec CLI
+      - name: Install Horusec
         run: |
           echo "Installing Horusec CLI..."
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/deployments/scripts/install.sh | bash -s latest
 
-      - name: Run Horusec Scan (JSON + debug)
+      - name: Run Horusec Scan
         run: |
-          echo "→ Running Horusec in JSON mode with debug and INFO severity…"
-          horusec start \
-            -p . \
-            -D \
-            --information-severity=true \
-            -o json \
-            -O horusec.json \
-            || true
-
-      - name: Create placeholder JSON if missing
-        run: |
-          if [ ! -f horusec.json ]; then
-            echo '{}' > horusec.json
-          fi
-
-      - name: Verify JSON output exists
-        run: |
-          if [ -f horusec.json ]; then
-            echo "✅ horusec.json is present"
-          else
-            echo "❌ horusec.json still not found – listing everything:" && ls -R . && exit 1
-          fi
-
-      - name: Dump Horusec JSON to console
-        run: |
-          echo "→ Full Horusec JSON report:"
-          cat horusec.json
-
-      - name: Run Horusec Scan (SARIF for GitHub)
-        run: |
-          echo "→ Generating SARIF report for code‑scanning…"
-          horusec start \
-            -p . \
-            --information-severity=true \
-            -o sarif \
-            -O horusec.sarif \
-            || true
+          echo "Running Horusec Scan for non-CodeQL-supported languages..."
+          horusec start -p . -D -o="sarif" -O="./horusec.sarif"
 
       - name: Upload Horusec SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: horusec.sarif
+          sarif_file: ./horusec.sarif
           category: Horusec
         continue-on-error: true
 
