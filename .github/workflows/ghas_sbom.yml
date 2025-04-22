@@ -21,18 +21,15 @@ jobs:
       - name: Install system tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq
+          sudo apt-get install -y jq curl
 
       - name: Install Syft
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
             | sh -s -- -b /usr/local/bin
 
-      - name: Install Vexy and upgrade OSV client
-        run: |
-          pip install --upgrade pip
-          pip install vexy
-          pip install --upgrade osv
+      - name: Install Vexy
+        run: pip install vexy
 
       - name: Generate CycloneDX SBOM
         run: syft . -o cyclonedx-json --file sbom.cdx.json
@@ -56,6 +53,11 @@ jobs:
           sources:
             osv:
           EOF
+
+      - name: Patch OSV schema enum to include 1.6.0
+        run: |
+          MODEL_PATH=$(python3 -c "import osv, os; print(os.path.join(os.path.dirname(osv.__file__), 'model.py'))")
+          sed -i '/v1_5_0 = "1.5.0"/a \    v1_6_0 = "1.6.0"' "$MODEL_PATH"
 
       - name: Generate VEX document
         run: |
