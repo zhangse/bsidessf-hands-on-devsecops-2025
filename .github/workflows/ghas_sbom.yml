@@ -1,4 +1,4 @@
-name: Generate SBOM
+name: Generate SBOM and VEX
 
 on:
   push:
@@ -6,49 +6,41 @@ on:
       - main
 
 jobs:
-  generate-sbom:
+  sbom-vex:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Check for package.json
-      id: check_package_json
-      run: |
-        if [ -f "package.json" ]; then
-          echo "has_package_json=true" >> $GITHUB_OUTPUT
-        else
-          echo "has_package_json=false" >> $GITHUB_OUTPUT
-        fi
-        
-    - name: Check for pom.xml
-      id: check_pom_xml
-      run: |
-        if [ -f "pom.xml" ]; then
-          echo "has_pom_xml=true" >> $GITHUB_OUTPUT
-        else
-          echo "has_pom_xml=false" >> $GITHUB_OUTPUT
-        fi
-        
-    - name: Setup Node.js
-      if: steps.check_package_json.outputs.has_package_json == 'true'
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
-        
-    - name: Install dependencies
-      if: steps.check_package_json.outputs.has_package_json == 'true'
-      run: npm ci
-        
-    - name: Generate SBOM
-      uses: anchore/sbom-action@v0
-      with:
-        path: .
-        output-file: sbom.spdx.json
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Upload SBOM
-      uses: actions/upload-artifact@v4
-      with:
-        name: sbom
-        path: sbom.spdx.json
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Install Vexy
+        run: pip install vexy
+
+      - name: Generate CycloneDX SBOM
+        run: syft . -o cyclonedx-json > sbom.cdx.json :contentReference[oaicite:0]{index=0}
+
+      - name: Create Vexy config
+        run: |
+          cat <<EOF > vexy.yml
+          sources:
+            osv:
+          EOF
+
+      - name: Generate VEX
+        run: vexy --config vexy.yml --in-file sbom.cdx.json --format json --output sbom.vex.json :contentReference[oaicite:1]{index=1}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-and-vex
+          path: |
+            sbom.cdx.json
+            sbom.vex.json
