@@ -65,6 +65,7 @@ jobs:
       - name: Generate CycloneDX VEX from SPDX SBOM
         run: |
           cve-bin-tool \
+            --disable-validation-check \
             --sbom spdx \
             --sbom-file sbom.spdx.json \
             --vex-type cyclonedx \
