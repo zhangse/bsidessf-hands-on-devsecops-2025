@@ -28,8 +28,12 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
             | sh -s -- -b /usr/local/bin
 
-      - name: Install Vexy
-        run: pip install vexy
+      - name: Install Vexy and bleeding‑edge OSV client
+        run: |
+          pip install --upgrade pip
+          pip install vexy
+          pip uninstall -y osv
+          pip install git+https://github.com/google/osv-python.git@main
 
       - name: Generate CycloneDX SBOM
         run: syft . -o cyclonedx-json --file sbom.cdx.json
@@ -53,11 +57,6 @@ jobs:
           sources:
             osv:
           EOF
-
-      - name: Patch OSV schema enum to include 1.6.0
-        run: |
-          MODEL_PATH=$(python3 -c "import osv, os; print(os.path.join(os.path.dirname(osv.__file__), 'model.py'))")
-          sed -i '/v1_5_0 = "1.5.0"/a \    v1_6_0 = "1.6.0"' "$MODEL_PATH"
 
       - name: Generate VEX document
         run: |
