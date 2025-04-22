@@ -25,7 +25,7 @@ jobs:
         run: pip install vexy
 
       - name: Generate CycloneDX SBOM
-        run: syft . -o cyclonedx-json > sbom.cdx.json :contentReference[oaicite:0]{index=0}
+        run: syft . -o cyclonedx-json > sbom.cdx.json
 
       - name: Create Vexy config
         run: |
@@ -35,7 +35,7 @@ jobs:
           EOF
 
       - name: Generate VEX
-        run: vexy --config vexy.yml --in-file sbom.cdx.json --format json --output sbom.vex.json :contentReference[oaicite:1]{index=1}
+        run: vexy --config vexy.yml --in-file sbom.cdx.json --format json --output sbom.vex.json 
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
