@@ -1,4 +1,4 @@
-name: Generate SBOM and VEX
+name: Generate SBOM & VEX
 
 on:
   push:
@@ -12,20 +12,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
+      - name: Install system tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
       - name: Install Syft
         run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+            | sh -s -- -b /usr/local/bin
 
       - name: Install Vexy
         run: pip install vexy
 
       - name: Generate CycloneDX SBOM
-        run: syft . -o cyclonedx-json > sbom.cdx.json
+        run: syft . -o cyclonedx-json --file sbom.cdx.json
+
+      - name: Patch metadata.tools for Vexy
+        run: |
+          jq '
+            .metadata.tools = (
+              .metadata.tools.components
+              | map({
+                  vendor: .author,
+                  name:   .name,
+                  version:.version
+                })
+            )
+          ' sbom.cdx.json > sbom.cdx.patched.json
 
       - name: Create Vexy config
         run: |
@@ -34,13 +53,18 @@ jobs:
             osv:
           EOF
 
-      - name: Generate VEX
-        run: vexy --config vexy.yml --in-file sbom.cdx.json --format json --output sbom.vex.json 
+      - name: Generate VEX document
+        run: |
+          vexy \
+            --config vexy.yml \
+            --in-file sbom.cdx.patched.json \
+            --format json \
+            --output sbom.vex.json
 
-      - name: Upload artifacts
+      - name: Upload SBOM & VEX artifacts
         uses: actions/upload-artifact@v4
         with:
           name: sbom-and-vex
           path: |
-            sbom.cdx.json
+            sbom.cdx.patched.json
             sbom.vex.json
