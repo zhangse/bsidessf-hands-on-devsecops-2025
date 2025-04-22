@@ -1,30 +1,26 @@
-name: SBOM + VEX Generation
 
+name: Generate SBOM
 on:
   push:
     branches:
-      - main
+    - main
+
+## GITHUB_TOKEN authentication, add only if you're not going to use a PAT
+permissions:
+  contents: write
 
 jobs:
-  sbom-vex:
+  generate-sbom:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4                                       
+        uses: actions/checkout@v4
 
-      - name: Install Trivy CLI
-        uses: aquasecurity/setup-trivy@v0.2.3                            
-      - name: Generate CycloneDX SBOM
-        run: trivy sbom --format cyclonedx --output sbom.cdx.json       
-
-      - name: Generate SBOM + VEX embedded
-        run: trivy sbom --format cyclonedx --scanners vuln \
-               --output sbom-vex.cdx.json                              
-
-      - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4                                
+      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+        uses: aquasecurity/trivy-action@0.28.0
         with:
-          name: sbom-vex
-          path: |
-            sbom.cdx.json
-            sbom-vex.cdx.json
+          scan-type: 'fs'
+          format: 'github'
+          output: 'dependency-results.sbom.json'
+          image-ref: '.'
+          github-pat: ${{ secrets.GITHUB_TOKEN }} 
