@@ -175,15 +175,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Horusec
+      - name: Install Horusec CLI
         run: |
           echo "Installing Horusec CLI..."
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/deployments/scripts/install.sh | bash -s latest
 
-      - name: Run Horusec Scan
+      - name: Run Horusec Scan (JSON + debug)
         run: |
-          echo "Running Horusec Scan for non-CodeQL-supported languages..."
-          horusec start -p . -D -o="sarif" -O="./horusec.sarif"
+          echo "→ Running Horusec in JSON mode with debug…"
+          horusec start \
+            -p . \
+            --log-level debug \
+            --information-severity=true \
+            -o json \
+            -O "./horusec.json" \
+            || true
+
+      - name: Dump Horusec JSON report to console
+        run: |
+          echo "→ Horusec found vulnerabilities (full JSON):"
+          cat ./horusec.json
+
+      - name: Run Horusec Scan (SARIF for GitHub UI)
+        run: |
+          echo "→ Generating SARIF report for GitHub code scanning…"
+          horusec start \
+            -p . \
+            --information-severity=true \
+            -o sarif \
+            -O "./horusec.sarif" \
+            || true
 
       - name: Upload Horusec SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
@@ -191,6 +212,7 @@ jobs:
           sarif_file: ./horusec.sarif
           category: Horusec
         continue-on-error: true
+
 
   ########################################################################
   # 6) SECURITY POST CHECK
