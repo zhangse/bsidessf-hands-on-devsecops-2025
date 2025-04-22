@@ -11,25 +11,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          pip install cve-bin-tool jq
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh |
-            sh -s -- -b /usr/local/bin
+      - name: Set up Python and tools
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - run: |
+          sudo apt-get update && sudo apt-get install -y jq curl
+          pip install cve-bin-tool
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+        shell: bash
 
-      - name: Create CycloneDX SBOM (1.6)
+      - name: Generate CycloneDX SBOM
         run: |
-          syft . \
-            -o cyclonedx-json \
-            --file sbom.cdx.json \
-            --cyclone-dx-schema-version 1.6
+          syft . -o cyclonedx-json --file sbom.cdx.json
 
-      - name: Normalize metadata.tools
+      - name: Patch SBOM for compliance
         run: |
-          jq '.metadata.tools = (.metadata.tools.components | map({ name: .name, version: .version }))' \
-            sbom.cdx.json > sbom.cdx.patched.json
+          jq '
+            .specVersion = "1.6" |
+            .metadata.tools = (.metadata.tools.components | map({ name: .name, version: .version })) |
+            del(.metadata.tools.components)
+          ' sbom.cdx.json > sbom.cdx.patched.json
+        shell: bash
 
-      - name: Generate VEX
+      - name: Generate VEX document
         run: |
           cve-bin-tool \
             --sbom cyclonedx \
@@ -38,8 +43,8 @@ jobs:
             --vex-output sbom.vex.json \
             --vendor "${{ github.repository_owner }}" \
             --product "${{ github.event.repository.name }}" \
-            --release "${{ github.sha }}" \
-            || true
+            --release "${{ github.sha }}" || true
+        shell: bash
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
