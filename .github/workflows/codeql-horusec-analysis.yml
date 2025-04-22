@@ -1,8 +1,10 @@
 name: "Run Code Security Scan"
 
 on:
-  workflow_call:
-
+  push:
+    branches:
+      - main
+      
 permissions:
   actions: write
   contents: read
