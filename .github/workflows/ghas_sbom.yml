@@ -58,3 +58,10 @@ jobs:
             --product "${{ github.event.repository.name }}" \
             --release "${{ github.sha }}" \
             || true
+      - name: Upload SBOM & VEX artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-and-vex
+          path: |
+            sbom.cdx.patched.json
+            sbom.vex.json  
