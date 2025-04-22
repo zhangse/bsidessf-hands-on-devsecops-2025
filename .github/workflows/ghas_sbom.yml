@@ -1,18 +1,19 @@
-name: SBOM + VEX (combined)
+name: Generate SBOM + VEX (embedded)
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  sbom-and-vex:
+  sbom-vex:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate SBOM with embedded vulnerabilities
-        uses: aquasecurity/trivy-action@v0.30.0
+      - name: Generate SBOM with embedded vulnerability data
+        uses: aquasecurity/trivy-action@v0
         with:
           scan-type: fs
           scan-ref: .
@@ -20,7 +21,7 @@ jobs:
           scanners: vuln
           output: sbom-vex.cdx.json
 
-      - name: Upload combined SBOM+VEX artifact
+      - name: Upload SBOM+VEX artifact
         uses: actions/upload-artifact@v4
         with:
           name: sbom-vex
