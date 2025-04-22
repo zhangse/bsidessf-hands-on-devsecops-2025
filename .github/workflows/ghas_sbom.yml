@@ -1,4 +1,4 @@
-name: Generate SBOM and VEX
+name: Generate SBOM + VEX
 
 on:
   push:
@@ -6,36 +6,20 @@ on:
       - main
 
 jobs:
-  generate-sbom:
+  sbom-and-vex:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Trivy CLI
-        uses: aquasecurity/trivy-action@v0.59.0
-
-      - name: Generate CycloneDX SBOM
-        run: |
-          trivy fs \
-            --format cyclonedx \
-            --output sbom.cdx.json \
-            .
-
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@v0.30.0
         with:
-          name: sbom-cyclonedx
-          path: sbom.cdx.json
-
-      - name: Generate CycloneDX VEX from SBOM
-        run: |
-          trivy sbom \
-            sbom.cdx.json \
-            --vex sbom.vex.cdx
-
-      - name: Upload VEX artifact
-        uses: actions/upload-artifact@v4
+          scan-type: fs
+          scan-ref: .
+          format: cyclonedx
+          output: sbom.cdx.json
+      - run: trivy sbom sbom.cdx.json --vex sbom.vex.cdx.json
+      - uses: actions/upload-artifact@v4
         with:
-          name: sbom-vex
-          path: sbom.vex.cdx
+          name: sbom-and-vex
+          path: |
+            sbom.cdx.json
+            sbom.vex.cdx.json
