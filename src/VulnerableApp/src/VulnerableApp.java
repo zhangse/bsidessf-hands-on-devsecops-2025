@@ -27,8 +27,14 @@ public class VulnerableApp extends HttpServlet {
         // Vulnerability 2: Command Injection
         try {
             String data = request.getParameter("data");
-            // Unsafe command execution
-            Runtime.getRuntime().exec("echo " + data);
+            // Validate input to allow only alphanumeric characters and spaces
+            if (data != null && data.matches("[a-zA-Z0-9 ]+")) {
+                // Safe command execution using ProcessBuilder
+                ProcessBuilder pb = new ProcessBuilder("echo", data);
+                pb.start();
+            } else {
+                response.getWriter().println("Invalid input.");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
